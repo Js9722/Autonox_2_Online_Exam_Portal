@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        input { padding: 10px; width: 300px; }
+        button { padding: 10px 20px; background: #6366f1; color: white; border: none; cursor: pointer; }
+        .result { margin: 15px 0; padding: 10px; background: #f0f0f0; }
+        .error { background: #ffebee; color: #d32f2f; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>Login Debug Test</h1>
+    
+    <div class="form-group">
+        <input type="email" id="email" placeholder="Email" value="demo@example.com">
+    </div>
+    <div class="form-group">
+        <input type="password" id="password" placeholder="Password" value="Password123@">
+    </div>
+    <div class="form-group">
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testHealth()">Test Health</button>
+    </div>
+    
+    <div id="result" class="result"></div>
+
+    <script>
+        async function testHealth() {
+            const result = document.getElementById('result');
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                result.className = 'result success';
+                result.innerHTML = `<strong>Health Check:</strong><br>Status: ${data.status}<br>Message: ${data.message}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `<strong>Health Check Failed:</strong><br>${error.message}`;
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('result');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            result.className = 'result';
+            result.innerHTML = 'Testing login...';
+            
+            try {
+                console.log('Attempting login with:', { email, password });
+                
+                const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>Login Successful!</strong><br>
+                        User: ${data.user_data.full_name}<br>
+                        Email: ${data.user_data.email}<br>
+                        Role: ${data.user_data.role}<br>
+                        Token: ${data.access_token.substring(0, 50)}...
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <strong>Login Failed!</strong><br>
+                        Status: ${response.status}<br>
+                        Error: ${data.detail || 'Unknown error'}
+                    `;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                result.className = 'result error';
+                result.innerHTML = `<strong>Network Error:</strong><br>${error.message}`;
+            }
+        }
+
+        // Auto-test health on load
+        window.onload = () => {
+            testHealth();
+        };
+    </script>
+</body>
+</html>

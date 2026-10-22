@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+</head>
+<body>
+    <div id="test">Testing JavaScript...</div>
+    <script>
+        try {
+            // Test basic JavaScript functionality
+            console.log('JavaScript is working');
+            document.getElementById('test').innerHTML = '✅ JavaScript is working properly';
+            
+            // Test DOM manipulation
+            const testDiv = document.createElement('div');
+            testDiv.textContent = 'DOM manipulation works';
+            document.body.appendChild(testDiv);
+            
+            // Test event listeners
+            document.addEventListener('click', function() {
+                console.log('Event listeners working');
+            });
+            
+            console.log('✅ All JavaScript tests passed');
+        } catch (error) {
+            console.error('❌ JavaScript error:', error);
+            document.getElementById('test').innerHTML = '❌ JavaScript error: ' + error.message;
+        }
+    </script>
+</body>
+</html>

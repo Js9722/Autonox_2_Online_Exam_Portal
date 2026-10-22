@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Evaluation System - Complete</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: float-up 15s infinite ease-in-out;
+        }
+
+        @keyframes float-up {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.1;
+            }
+            50% {
+                transform: translateY(-100px) rotate(180deg);
+                opacity: 0.3;
+            }
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .auth-header {
+            background: var(--gradient);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .auth-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .auth-body {
+            padding: 40px;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-dark);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-group label .required {
+            color: var(--error);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper .material-icons-round {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 20px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-control.error {
+            border-color: var(--error);
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Password Toggle */
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        /* Skills Selection */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .skill-tag {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .skill-tag.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .skill-tag:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-header h1 {
+                font-size: 2rem;
+            }
+
+            .auth-body {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-nav {
+                flex-direction: column;
+            }
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Assessment Styles */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .assessment-option {
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .assessment-option:hover {
+            background: #e9ecef;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .assessment-option.selected {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .assessment-option label {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .assessment-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+        }
+
+        .assessment-option .option-text {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <!-- Floating Elements -->
+    <div class="floating-element" style="width: 80px; height: 80px; top: 10%; left: 10%;"></div>
+    <div class="floating-element" style="width: 60px; height: 60px; top: 70%; right: 10%;"></div>
+    <div class="floating-element" style="width: 100px; height: 100px; bottom: 10%; left: 20%;"></div>
+
+    <div class="main-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>AI Interview Evaluation System</h1>
+                <p>Complete Candidate Assessment Platform</p>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span>System Online</span>
+                </div>
+            </div>
+
+            <div class="auth-body">
+                <!-- Tab Navigation -->
+                <div class="tab-nav">
+                    <button class="tab-btn active" onclick="switchTab('login')">
+                        <span class="material-icons-round">login</span>
+                        Login
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('register')">
+                        <span class="material-icons-round">person_add</span>
+                        Register
+                    </button>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="alertMessage" class="alert">
+                    <span class="material-icons-round"></span>
+                    <span id="alertText"></span>
+                </div>
+
+                <!-- Login Tab -->
+                <div id="loginTab" class="tab-content active">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Email Address <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons-round">email</span>
+                                <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email" required>
+                            </div>
+                            <div class="error-message" id="loginEmailError">Please enter a valid email address</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginPassword">Password <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons-round">lock</span>
+                                <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                                    <span class="material-icons-round">visibility</span>
+                                </button>
+                            </div>
+                            <div class="error-message" id="loginPasswordError">Password is required</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="rememberMe">
+                                <span>Remember me</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+                            <span class="material-icons-round">login</span>
+                            <span>Login</span>
+                        </button>
+
+                        <div style="text-align: center; margin-top: 20px;">
+                            <p>Don't have an account? <a href="#" onclick="switchTab('register')" style="color: var(--primary); text-decoration: none;">Register here</a></p>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Register Tab -->
+                <div id="registerTab" class="tab-content">
+                    <form id="registerForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="fullName">Full Name <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <span class="material-icons-round">person</span>
+                                    <input type="text" id="fullName" class="form-control" placeholder="John Doe" required>
+                                </div>
+                                <div class="error-message" id="fullNameError">Please enter your full name</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email Address <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <span class="material-icons-round">email</span>
+                                    <input type="email" id="email" class="form-control" placeholder="john@example.com" required>
+                                </div>
+                                <div class="error-message" id="emailError">Please enter a valid email address</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">Phone Number <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <span class="material-icons-round">phone</span>
+                                    <input type="tel" id="phone" class="form-control" placeholder="+1234567890" required>
+                                </div>
+                                <div class="error-message" id="phoneError">Please enter a valid phone number</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="experienceLevel">Experience Level <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <span class="material-icons-round">work</span>
+                                    <select id="experienceLevel" class="form-control" required>
+                                        <option value="">Select Experience</option>
+                                        <option value="junior">Junior (0-2 years)</option>
+                                        <option value="mid">Mid (2-5 years)</option>
+                                        <option value="senior">Senior (5+ years)</option>
+                                        <option value="lead">Lead/Principal</option>
+                                    </select>
+                                </div>
+                                <div class="error-message" id="experienceLevelError">Please select your experience level</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appliedRole">Applied Role <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons-round">business_center</span>
+                                <input type="text" id="appliedRole" class="form-control" placeholder="Software Engineer" required>
+                            </div>
+                            <div class="error-message" id="appliedRoleError">Please enter the role you're applying for</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Skills <span class="required">*</span> (Select up to 10)</label>
+                            <div class="skills-container" id="skillsContainer">
+                                <div class="skill-tag" onclick="toggleSkill(this)">JavaScript</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">Python</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">React</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">Node.js</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">TypeScript</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">Java</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">C++</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">HTML/CSS</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">SQL</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">MongoDB</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">Docker</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">AWS</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">Git</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">REST APIs</div>
+                                <div class="skill-tag" onclick="toggleSkill(this)">GraphQL</div>
+                            </div>
+                            <div class="error-message" id="skillsError">Please select at least 3 skills</div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="password">Password <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <span class="material-icons-round">lock</span>
+                                    <input type="password" id="password" class="form-control" placeholder="Create a strong password" required>
+                                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                        <span class="material-icons-round">visibility</span>
+                                    </button>
+                                </div>
+                                <div style="margin-top: 8px; font-size: 0.85rem; color: #6b7280;">
+                                    Password must contain:
+                                    <ul style="margin: 4px 0; padding-left: 20px;">
+                                        <li>At least 8 characters</li>
+                                        <li>One uppercase letter (A-Z)</li>
+                                        <li>One lowercase letter (a-z)</li>
+                                        <li>One number (0-9)</li>
+                                        <li>One special character (@$!%*?&)</li>
+                                    </ul>
+                                </div>
+                                <div class="error-message" id="passwordError">Password must meet all requirements above</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <span class="material-icons-round">lock</span>
+                                    <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm password" required>
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                        <span class="material-icons-round">visibility</span>
+                                    </button>
+                                </div>
+                                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full" id="registerBtn">
+                            <span class="material-icons-round">person_add</span>
+                            <span>Create Account</span>
+                        </button>
+
+                        <div style="text-align: center; margin-top: 20px;">
+                            <p>Already have an account? <a href="#" onclick="switchTab('login')" style="color: var(--primary); text-decoration: none;">Login here</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Account Info -->
+        <div class="auth-card">
+            <div class="auth-body">
+                <h3 style="margin-bottom: 15px; color: var(--primary);">
+                    <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">info</span>
+                    Demo Account
+                </h3>
+                <p style="margin-bottom: 10px;"><strong>Email:</strong> demo@example.com</p>
+                <p style="margin-bottom: 10px;"><strong>Password:</strong> Password123@</p>
+                <p style="color: #6b7280; font-size: 0.9rem;">Use these credentials to test the login functionality.</p>
+                <p style="color: #ef4444; font-size: 0.85rem; margin-top: 10px;">Note: Password must contain uppercase, lowercase, number, and special character (@$!%*?&)</p>
+            </div>
+        </div>
+
+        <!-- Dashboard Section (Hidden Initially) -->
+        <div id="dashboardSection" class="auth-card" style="display: none;">
+            <div class="auth-header">
+                <h1>Candidate Dashboard</h1>
+                <p>Welcome to your AI Interview System</p>
+            </div>
+            <div class="auth-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <div>
+                        <h2 id="dashboardUserName" style="margin: 0; color: var(--primary);"></h2>
+                        <p id="dashboardUserEmail" style="margin: 5px 0; color: #6b7280;"></p>
+                        <p id="dashboardUserRole" style="margin: 5px 0; color: #6b7280;"></p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="logout()">
+                        <span class="material-icons-round">logout</span>
+                        Logout
+                    </button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">
+                            <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">person</span>
+                            Profile Information
+                        </h3>
+                        <p><strong>Full Name:</strong> <span id="profileName"></span></p>
+                        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                        <p><strong>Phone:</strong> <span id="profilePhone"></span></p>
+                        <p><strong>Experience Level:</strong> <span id="profileExperience"></span></p>
+                        <p><strong>Applied Role:</strong> <span id="profileRole"></span></p>
+                    </div>
+
+                    <div class="form-group">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">
+                            <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">psychology</span>
+                            Skills
+                        </h3>
+                        <div id="profileSkills" class="skills-container"></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background: rgba(99, 102, 241, 0.1); border-radius: 12px;">
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">
+                        <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">assessment</span>
+                        Assessment Status
+                    </h3>
+                    <p style="margin-bottom: 10px;">Your profile is ready for the AI Interview Assessment.</p>
+                    <button class="btn btn-primary" onclick="startAssessment()">
+                        <span class="material-icons-round">play_arrow</span>
+                        Start Assessment
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Section (Hidden Initially) -->
+        <div id="assessmentSection" class="auth-card" style="display: none;">
+            <div class="auth-header">
+                <h1>AI Assessment</h1>
+                <p>Complete the technical evaluation</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                    <div id="timerDisplay" style="font-size: 1.2rem; font-weight: 600;">30:00</div>
+                    <div id="progressText" style="font-size: 0.9rem;">1 / 10</div>
+                </div>
+                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; margin-top: 10px;">
+                    <div id="progressBar" style="width: 10%; height: 100%; background: white; border-radius: 3px; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+            <div class="auth-body">
+                <div id="questionContainer">
+                    <div id="questionNumber" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; color: var(--primary);"></div>
+                    <div id="questionText" style="font-size: 1.2rem; margin-bottom: 25px; line-height: 1.6;"></div>
+                    <div id="optionsContainer" class="options-container"></div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn" disabled>
+                        <span class="material-icons-round">arrow_back</span>
+                        Previous
+                    </button>
+                    <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">
+                        Next
+                        <span class="material-icons-round">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section (Hidden Initially) -->
+        <div id="resultsSection" class="auth-card" style="display: none;">
+            <div class="auth-header">
+                <h1>Assessment Results</h1>
+                <p>Your performance evaluation</p>
+            </div>
+            <div class="auth-body">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 3rem; font-weight: 700; color: var(--primary); margin-bottom: 10px;">
+                        <span id="scoreDisplay">0%</span>
+                    </div>
+                    <div id="performanceLevel" style="font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;"></div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">
+                            <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">check_circle</span>
+                            Performance Summary
+                        </h3>
+                        <p><strong>Correct Answers:</strong> <span id="correctAnswers">0 / 0</span></p>
+                        <p><strong>Total Questions:</strong> <span id="totalQuestions">0</span></p>
+                        <p><strong>Time Taken:</strong> <span id="timeTaken">0m 0s</span></p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">
+                            <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">insights</span>
+                            Evaluation
+                        </h3>
+                        <div id="evaluationMessage"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="btn btn-primary" onclick="backToDashboard()">
+                        <span class="material-icons-round">dashboard</span>
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'http://localhost:8000/api/v1';
+
+        // Assessment Data
+        let currentQuestionIndex = 0;
+        let assessmentAnswers = {};
+        let timeRemaining = 30 * 60; // 30 minutes
+        let assessmentStartTime;
+        let timerInterval;
+
+        // Assessment Questions
+        const assessmentQuestions = [
+            {
+                text: "What is the time complexity of binary search algorithm?",
+                options: [
+                    "O(n)",
+                    "O(log n)",
+                    "O(n²)",
+                    "O(1)"
+                ],
+                correctAnswer: 1
+            },
+            {
+                text: "Which of the following is NOT a JavaScript data type?",
+                options: [
+                    "Number",
+                    "String",
+                    "Float",
+                    "Boolean"
+                ],
+                correctAnswer: 2
+            },
+            {
+                text: "What does CSS stand for?",
+                options: [
+                    "Computer Style Sheets",
+                    "Cascading Style Sheets",
+                    "Creative Style Sheets",
+                    "Colorful Style Sheets"
+                ],
+                correctAnswer: 1
+            },
+            {
+                text: "Which method is used to add an element to the end of an array in JavaScript?",
+                options: [
+                    "push()",
+                    "pop()",
+                    "shift()",
+                    "unshift()"
+                ],
+                correctAnswer: 0
+            },
+            {
+                text: "What is the purpose of the 'git clone' command?",
+                options: [
+                    "To create a new repository",
+                    "To copy an existing repository",
+                    "To delete a repository",
+                    "To merge branches"
+                ],
+                correctAnswer: 1
+            },
+            {
+                text: "Which HTTP status code represents 'Not Found'?",
+                options: [
+                    "200",
+                    "301",
+                    "404",
+                    "500"
+                ],
+                correctAnswer: 2
+            },
+            {
+                text: "What is the primary purpose of React.js?",
+                options: [
+                    "Database management",
+                    "Building user interfaces",
+                    "Server-side programming",
+                    "Network requests"
+                ],
+                correctAnswer: 1
+            },
+            {
+                text: "Which SQL command is used to retrieve data from a database?",
+                options: [
+                    "GET",
+                    "FETCH",
+                    "SELECT",
+                    "RETRIEVE"
+                ],
+                correctAnswer: 2
+            },
+            {
+                text: "What is the difference between 'let' and 'const' in JavaScript?",
+                options: [
+                    "'let' is for numbers, 'const' is for strings",
+                    "'let' can be reassigned, 'const' cannot",
+                    "'const' is faster than 'let'",
+                    "There is no difference"
+                ],
+                correctAnswer: 1
+            },
+            {
+                text: "Which programming paradigm is primarily supported by Python?",
+                options: [
+                    "Procedural programming only",
+                    "Object-oriented programming only",
+                    "Functional programming only",
+                    "Multiple paradigms including OOP and functional"
+                ],
+                correctAnswer: 3
+            }
+        ];
+
+        // Tab Switching
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.getElementById('loginTab').classList.add('active');
+                buttons[0].classList.add('active');
+            } else {
+                document.getElementById('registerTab').classList.add('active');
+                buttons[1].classList.add('active');
+            }
+        }
+
+        // Password Toggle
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.nextElementSibling;
+            const icon = button.querySelector('.material-icons-round');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                field.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        // Skills Selection
+        let selectedSkills = [];
+        function toggleSkill(element) {
+            const skill = element.textContent;
+            
+            if (selectedSkills.includes(skill)) {
+                selectedSkills = selectedSkills.filter(s => s !== skill);
+                element.classList.remove('selected');
+            } else {
+                if (selectedSkills.length < 10) {
+                    selectedSkills.push(skill);
+                    element.classList.add('selected');
+                } else {
+                    showAlert('You can select maximum 10 skills', 'error');
+                }
+            }
+        }
+
+        // Alert Messages
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertMessage');
+            const alertText = document.getElementById('alertText');
+            const icon = alert.querySelector('.material-icons-round');
+            
+            alert.className = `alert alert-${type} show`;
+            alertText.textContent = message;
+            
+            if (type === 'success') {
+                icon.textContent = 'check_circle';
+            } else {
+                icon.textContent = 'error';
+            }
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Form Validation
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePhone(phone) {
+            return /^[\+]?[1-9][\d]{0,15}$/.test(phone);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 8;
+        }
+
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            console.log('Login attempt:', { email, password: '***' });
+            
+            // Reset errors
+            document.querySelectorAll('.error-message').forEach(err => err.classList.remove('show'));
+            document.querySelectorAll('.form-control').forEach(field => field.classList.remove('error'));
+            
+            // Validate
+            let isValid = true;
+            
+            if (!email || !validateEmail(email)) {
+                document.getElementById('loginEmailError').textContent = 'Please enter a valid email address';
+                document.getElementById('loginEmailError').classList.add('show');
+                document.getElementById('loginEmail').classList.add('error');
+                isValid = false;
+            }
+            
+            if (!password) {
+                document.getElementById('loginPasswordError').textContent = 'Password is required';
+                document.getElementById('loginPasswordError').classList.add('show');
+                document.getElementById('loginPassword').classList.add('error');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                console.log('Validation failed');
+                return;
+            }
+            
+            // Show loading
+            const loginBtn = document.getElementById('loginBtn');
+            const originalContent = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<div class="spinner"></div> Logging in...';
+            loginBtn.disabled = true;
+            
+            try {
+                console.log('Sending login request to:', `${API_BASE}/auth/login`);
+                
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok) {
+                    showAlert('Login successful! Welcome back.', 'success');
+                    // Store token
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user_data));
+                    
+                    console.log('Login successful, user data:', data.user_data);
+                    
+                    // Show success message and redirect to dashboard
+                    setTimeout(() => {
+                        showAlert(`Welcome ${data.user_data.full_name}! Redirecting to dashboard...`, 'success');
+                        showDashboard(data.user_data);
+                    }, 1000);
+                } else {
+                    console.log('Login failed:', data);
+                    const errorMsg = data.detail || 'Login failed. Please check your credentials.';
+                    showAlert(errorMsg, 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Network error. Please check your connection and try again.', 'error');
+            } finally {
+                loginBtn.innerHTML = originalContent;
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Registration Form Handler
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                full_name: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                experience_level: document.getElementById('experienceLevel').value,
+                applied_role: document.getElementById('appliedRole').value,
+                password: document.getElementById('password').value,
+                confirm_password: document.getElementById('confirmPassword').value,
+                skills: selectedSkills
+            };
+            
+            // Reset errors
+            document.querySelectorAll('.error-message').forEach(err => err.classList.remove('show'));
+            document.querySelectorAll('.form-control').forEach(field => field.classList.remove('error'));
+            
+            // Validate
+            let isValid = true;
+            
+            if (!formData.full_name.trim()) {
+                document.getElementById('fullNameError').classList.add('show');
+                document.getElementById('fullName').classList.add('error');
+                isValid = false;
+            }
+            
+            if (!validateEmail(formData.email)) {
+                document.getElementById('emailError').classList.add('show');
+                document.getElementById('email').classList.add('error');
+                isValid = false;
+            }
+            
+            if (!validatePhone(formData.phone)) {
+                document.getElementById('phoneError').classList.add('show');
+                document.getElementById('phone').classList.add('error');
+                isValid = false;
+            }
+            
+            if (!formData.experience_level) {
+                document.getElementById('experienceLevelError').classList.add('show');
+                document.getElementById('experienceLevel').classList.add('error');
+                isValid = false;
+            }
+            
+            if (!formData.applied_role.trim()) {
+                document.getElementById('appliedRoleError').classList.add('show');
+                document.getElementById('appliedRole').classList.add('error');
+                isValid = false;
+            }
+            
+            if (selectedSkills.length < 3) {
+                document.getElementById('skillsError').classList.add('show');
+                isValid = false;
+            }
+            
+            if (!validatePassword(formData.password)) {
+                document.getElementById('passwordError').classList.add('show');
+                document.getElementById('password').classList.add('error');
+                isValid = false;
+            }
+            
+            if (formData.password !== formData.confirm_password) {
+                document.getElementById('confirmPasswordError').classList.add('show');
+                document.getElementById('confirmPassword').classList.add('error');
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            // Show loading
+            const registerBtn = document.getElementById('registerBtn');
+            const originalContent = registerBtn.innerHTML;
+            registerBtn.innerHTML = '<div class="spinner"></div> Creating Account...';
+            registerBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Registration successful! Your account has been created.', 'success');
+                    // Store token
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user_data));
+                    
+                    // Switch to login tab after successful registration
+                    setTimeout(() => {
+                        switchTab('login');
+                        showAlert('Account created successfully! You can now login.', 'success');
+                    }, 1500);
+                } else {
+                    showAlert(data.detail || 'Registration failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please check your connection.', 'error');
+            } finally {
+                registerBtn.innerHTML = originalContent;
+                registerBtn.disabled = false;
+            }
+        });
+
+        // Check system status on load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                if (response.ok) {
+                    console.log('System is online and ready');
+                } else {
+                    showAlert('Backend system is not responding. Please check if the server is running.', 'error');
+                }
+            } catch (error) {
+                showAlert('Cannot connect to backend. Please ensure the server is running on localhost:8000', 'error');
+            }
+        });
+
+        // Dashboard Functions
+        function showDashboard(userData) {
+            // Hide login/register forms
+            const authCard = document.querySelector('.auth-card');
+            authCard.style.display = 'none';
+            
+            // Show dashboard
+            const dashboard = document.getElementById('dashboardSection');
+            dashboard.style.display = 'block';
+            
+            // Populate user data
+            document.getElementById('dashboardUserName').textContent = userData.full_name || 'User';
+            document.getElementById('dashboardUserEmail').textContent = userData.email;
+            document.getElementById('dashboardUserRole').textContent = `Role: ${userData.role}`;
+            
+            // Populate profile information
+            document.getElementById('profileName').textContent = userData.full_name || 'N/A';
+            document.getElementById('profileEmail').textContent = userData.email;
+            
+            if (userData.candidate) {
+                document.getElementById('profilePhone').textContent = userData.candidate.phone || 'N/A';
+                document.getElementById('profileExperience').textContent = userData.candidate.experience_level || 'N/A';
+                document.getElementById('profileRole').textContent = userData.candidate.applied_role || 'N/A';
+                
+                // Display skills
+                const skillsContainer = document.getElementById('profileSkills');
+                skillsContainer.innerHTML = '';
+                if (userData.candidate.extracted_skills && userData.candidate.extracted_skills.length > 0) {
+                    userData.candidate.extracted_skills.forEach(skill => {
+                        const skillTag = document.createElement('div');
+                        skillTag.className = 'skill-tag selected';
+                        skillTag.textContent = skill;
+                        skillsContainer.appendChild(skillTag);
+                    });
+                } else {
+                    skillsContainer.innerHTML = '<p style="color: #6b7280;">No skills specified</p>';
+                }
+            } else {
+                document.getElementById('profilePhone').textContent = 'N/A';
+                document.getElementById('profileExperience').textContent = 'N/A';
+                document.getElementById('profileRole').textContent = 'N/A';
+                document.getElementById('profileSkills').innerHTML = '<p style="color: #6b7280;">No candidate data available</p>';
+            }
+            
+            console.log('Dashboard displayed for user:', userData);
+        }
+
+        function logout() {
+            // Clear localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // Hide dashboard
+            document.getElementById('dashboardSection').style.display = 'none';
+            
+            // Show login form
+            const authCard = document.querySelector('.auth-card');
+            authCard.style.display = 'block';
+            
+            // Switch to login tab
+            switchTab('login');
+            
+            // Clear form fields
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            showAlert('You have been logged out successfully.', 'success');
+            console.log('User logged out');
+        }
+
+        function startAssessment() {
+            console.log('Starting assessment...');
+            
+            // Hide dashboard and show assessment
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('assessmentSection').style.display = 'block';
+            
+            // Initialize assessment
+            initializeAssessment();
+        }
+
+        function initializeAssessment() {
+            currentQuestionIndex = 0;
+            assessmentAnswers = {};
+            timeRemaining = 30 * 60; // 30 minutes
+            assessmentStartTime = Date.now();
+            
+            // Load first question
+            loadQuestion();
+            
+            // Start timer
+            startTimer();
+            
+            showAlert('Assessment started! You have 30 minutes to complete all questions.', 'success');
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= assessmentQuestions.length) {
+                completeAssessment();
+                return;
+            }
+            
+            const question = assessmentQuestions[currentQuestionIndex];
+            const questionContainer = document.getElementById('questionContainer');
+            const questionNumber = document.getElementById('questionNumber');
+            const questionText = document.getElementById('questionText');
+            const optionsContainer = document.getElementById('optionsContainer');
+            
+            questionNumber.textContent = `Question ${currentQuestionIndex + 1} of ${assessmentQuestions.length}`;
+            questionText.textContent = question.text;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add options
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'assessment-option';
+                optionDiv.innerHTML = `
+                    <label>
+                        <input type="radio" name="answer" value="${index}" ${assessmentAnswers[currentQuestionIndex] === index ? 'checked' : ''}>
+                        <span class="option-text">${option}</span>
+                    </label>
+                `;
+                optionDiv.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Update progress and navigation
+            updateProgress();
+            updateNavigationButtons();
+        }
+
+        function selectOption(optionIndex) {
+            assessmentAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Update UI
+            document.querySelectorAll('.assessment-option').forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        function nextQuestion() {
+            // Check if current question is answered
+            if (assessmentAnswers[currentQuestionIndex] === undefined) {
+                showAlert('Please select an answer before proceeding.', 'error');
+                return;
+            }
+            
+            if (currentQuestionIndex < assessmentQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                completeAssessment();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // Update previous button
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            // Update next button text
+            if (currentQuestionIndex === assessmentQuestions.length - 1) {
+                nextBtn.innerHTML = '<span class="material-icons-round">check</span> Complete';
+            } else {
+                nextBtn.innerHTML = 'Next <span class="material-icons-round">arrow_forward</span>';
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / assessmentQuestions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${currentQuestionIndex + 1} / ${assessmentQuestions.length}`;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    completeAssessment();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeRemaining < 300) { // Less than 5 minutes
+                document.getElementById('timerDisplay').style.color = '#ef4444';
+            }
+        }
+
+        function completeAssessment() {
+            clearInterval(timerInterval);
+            
+            // Calculate results
+            const results = calculateResults();
+            
+            // Show results
+            showResults(results);
+        }
+
+        function calculateResults() {
+            let correct = 0;
+            let total = assessmentQuestions.length;
+            
+            assessmentQuestions.forEach((question, index) => {
+                if (assessmentAnswers[index] === question.correctAnswer) {
+                    correct++;
+                }
+            });
+            
+            const score = Math.round((correct / total) * 100);
+            
+            return {
+                totalQuestions: total,
+                correctAnswers: correct,
+                score: score,
+                timeTaken: Math.floor((Date.now() - assessmentStartTime) / 1000),
+                answers: assessmentAnswers
+            };
+        }
+
+        function showResults(results) {
+            // Hide assessment and show results
+            document.getElementById('assessmentSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Populate results
+            document.getElementById('scoreDisplay').textContent = results.score + '%';
+            document.getElementById('correctAnswers').textContent = `${results.correctAnswers} / ${results.totalQuestions}`;
+            document.getElementById('timeTaken').textContent = formatTime(results.timeTaken);
+            
+            // Determine performance level
+            let performance = '';
+            let performanceColor = '';
+            
+            if (results.score >= 80) {
+                performance = 'Excellent';
+                performanceColor = '#10b981';
+            } else if (results.score >= 60) {
+                performance = 'Good';
+                performanceColor = '#f59e0b';
+            } else {
+                performance = 'Needs Improvement';
+                performanceColor = '#ef4444';
+            }
+            
+            document.getElementById('performanceLevel').textContent = performance;
+            document.getElementById('performanceLevel').style.color = performanceColor;
+            
+            // Add evaluation message
+            const evaluationMessage = document.getElementById('evaluationMessage');
+            if (results.score >= 80) {
+                evaluationMessage.innerHTML = `
+                    <p style="color: #10b981; font-weight: 600;">Excellent performance!</p>
+                    <p>You demonstrated strong technical knowledge and problem-solving skills. You would be a great fit for technical roles requiring advanced expertise.</p>
+                `;
+            } else if (results.score >= 60) {
+                evaluationMessage.innerHTML = `
+                    <p style="color: #f59e0b; font-weight: 600;">Good performance!</p>
+                    <p>You have solid technical foundations. With some additional preparation, you could excel in technical roles.</p>
+                `;
+            } else {
+                evaluationMessage.innerHTML = `
+                    <p style="color: #ef4444; font-weight: 600;">Needs improvement.</p>
+                    <p>Consider strengthening your technical knowledge through additional study and practice before applying for technical positions.</p>
+                `;
+            }
+            
+            console.log('Assessment completed:', results);
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}m ${secs}s`;
+        }
+
+        function backToDashboard() {
+            // Hide results and show dashboard
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+            
+            // Reset assessment data
+            currentQuestionIndex = 0;
+            assessmentAnswers = {};
+            timeRemaining = 30 * 60;
+        }
+
+        // Check if user is already logged in on page load
+        window.addEventListener('load', async () => {
+            // Check for existing session
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
+            
+            if (token && userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    console.log('Found existing session for user:', user);
+                    showDashboard(user);
+                    showAlert('Welcome back! You are already logged in.', 'success');
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                }
+            }
+            
+            // Check backend health
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                if (response.ok) {
+                    console.log('System is online and ready');
+                } else {
+                    showAlert('Backend system is not responding. Please check if the server is running.', 'error');
+                }
+            } catch (error) {
+                showAlert('Cannot connect to backend. Please ensure the server is running on localhost:8000', 'error');
+            }
+        });
+
+        // Auto-fill demo credentials for testing
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + D for demo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                document.getElementById('loginEmail').value = 'demo@example.com';
+                document.getElementById('loginPassword').value = 'Password123@';
+                showAlert('Demo credentials filled!', 'success');
+            }
+        });
+    </script>
+</body>
+</html>

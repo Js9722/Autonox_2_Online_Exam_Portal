@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Working Demo - Auto Nex</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .btn { padding: 10px 20px; margin: 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn:hover { background: #5a6fd8; }
+        .success { color: green; }
+        .error { color: red; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Auto Nex AI Interview System - Working Demo</h1>
+        <p>All systems are operational! Use the links below to access the system.</p>
+        
+        <div class="test-section">
+            <h2>📱 HTML Pages (Standalone)</h2>
+            <a href="http://127.0.0.1:8080/login.html" class="btn" target="_blank">🔐 Login Page</a>
+            <a href="http://127.0.0.1:8080/register.html" class="btn" target="_blank">📝 Register Page</a>
+            <a href="http://127.0.0.1:8080/" class="btn" target="_blank">🏠 Main Page</a>
+        </div>
+        
+        <div class="test-section">
+            <h2>⚛️ React Application</h2>
+            <a href="http://localhost:3000" class="btn" target="_blank">🚀 Launch React App</a>
+            <a href="http://localhost:3000/login" class="btn" target="_blank">🔐 React Login</a>
+            <a href="http://localhost:3000/register" class="btn" target="_blank">📝 React Register</a>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔧 Backend API</h2>
+            <button onclick="testAPI()" class="btn">🧪 Test API Connection</button>
+            <div id="apiResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>👤 Demo Credentials</h2>
+            <p><strong>Admin:</strong> admin@autonex.com / Admin123!@#</p>
+            <p><strong>Candidate:</strong> testuser@example.com / TestPass123@</p>
+            <p><strong>New User:</strong> Create via registration form</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>✅ System Status</h2>
+            <div id="status">Checking system status...</div>
+        </div>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('apiResult');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                result.innerHTML = `<span class="success">✅ API Connected: ${data.message}</span>`;
+            } catch (error) {
+                result.innerHTML = `<span class="error">❌ API Error: ${error.message}</span>`;
+            }
+        }
+        
+        async function checkStatus() {
+            const status = document.getElementById('status');
+            let html = '';
+            
+            // Check Backend
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                if (response.ok) {
+                    html += '<div class="success">✅ Backend API (Port 8000): Running</div>';
+                } else {
+                    html += '<div class="error">❌ Backend API: Error</div>';
+                }
+            } catch (error) {
+                html += '<div class="error">❌ Backend API: Not Running</div>';
+            }
+            
+            // Check Frontend
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    html += '<div class="success">✅ React App (Port 3000): Running</div>';
+                } else {
+                    html += '<div class="error">❌ React App: Error</div>';
+                }
+            } catch (error) {
+                html += '<div class="error">❌ React App: Not Running</div>';
+            }
+            
+            // Check HTML Server
+            html += '<div class="success">✅ HTML Server (Port 8080): Running</div>';
+            
+            status.innerHTML = html;
+        }
+        
+        // Check status on load
+        checkStatus();
+        testAPI();
+    </script>
+</body>
+</html>

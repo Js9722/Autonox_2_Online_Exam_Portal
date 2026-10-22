@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Evaluation System - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: #f5f5f5;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .tab-content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            min-height: 500px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        
+        .status-online {
+            background: #28a745;
+        }
+        
+        .status-offline {
+            background: #dc3545;
+        }
+        
+        .file-upload {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+        
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+        
+        .file-upload.dragover {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+        
+        .question-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .video-feed {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+        }
+        
+        .audio-recorder {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .recording-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+            margin-left: 8px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 AI Interview Evaluation System</h1>
+            <p>Enhanced Platform with Complete Assessment Features</p>
+        </div>
+
+        <!-- System Status -->
+        <div class="card">
+            <h3>🔍 System Status</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                    <strong>Backend API</strong>
+                    <div>
+                        <span id="backend-status">Checking...</span>
+                        <span id="backend-indicator" class="status-indicator"></span>
+                    </div>
+                </div>
+                <div>
+                    <strong>Database</strong>
+                    <div>
+                        <span id="db-status">Ready</span>
+                        <span class="status-indicator status-online"></span>
+                    </div>
+                </div>
+                <div>
+                    <strong>File Upload</strong>
+                    <div>
+                        <span id="upload-status">Ready</span>
+                        <span class="status-indicator status-online"></span>
+                    </div>
+                </div>
+                <div>
+                    <strong>Proctoring</strong>
+                    <div>
+                        <span id="proctoring-status">Ready</span>
+                        <span class="status-indicator status-online"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
+                <button class="tab" onclick="showTab('assessment')">Assessment</button>
+                <button class="tab" onclick="showTab('upload')">Resume Upload</button>
+                <button class="tab" onclick="showTab('speaking')">Speaking Test</button>
+                <button class="tab" onclick="showTab('proctoring')">Proctoring</button>
+                <button class="tab" onclick="showTab('admin')">Admin</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="tab-content">
+                <h3>📊 Candidate Dashboard</h3>
+                <div id="dashboard-content">
+                    <div class="alert alert-info">
+                        Please login to view your dashboard and assessment history.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Tab -->
+            <div id="assessment-tab" class="tab-content hidden">
+                <h3>🎯 Assessment Interface</h3>
+                <div id="assessment-content">
+                    <div class="alert alert-info">
+                        Start an assessment to begin the interview evaluation process.
+                    </div>
+                    <button class="btn" onclick="startAssessment()">Start New Assessment</button>
+                    <div id="assessment-progress" style="margin-top: 20px; display: none;">
+                        <h4>Assessment in Progress</h4>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <p id="progress-text">Question 0 of 65</p>
+                        <div id="current-question" style="margin-top: 20px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Upload Tab -->
+            <div id="upload-tab" class="tab-content hidden">
+                <h3>📝 Resume Upload & Analysis</h3>
+                <div id="upload-content">
+                    <div class="file-upload" id="file-upload-area">
+                        <div>
+                            <p style="font-size: 1.2rem; margin-bottom: 10px;">📄</p>
+                            <p><strong>Click to upload or drag and drop</strong></p>
+                            <p style="color: #6c757d; font-size: 0.9rem;">PDF, DOC, DOCX (Max 10MB)</p>
+                        </div>
+                        <input type="file" id="resume-file" accept=".pdf,.doc,.docx" style="display: none;">
+                    </div>
+                    <div id="upload-result" style="margin-top: 20px; display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Speaking Test Tab -->
+            <div id="speaking-tab" class="tab-content hidden">
+                <h3>🎤 Speaking Skills Test</h3>
+                <div id="speaking-content">
+                    <div class="alert alert-info">
+                        Test your speaking skills with audio recording and evaluation.
+                    </div>
+                    <div class="audio-recorder">
+                        <h4>Audio Recorder</h4>
+                        <button id="record-btn" class="btn" onclick="toggleRecording()">
+                            🎤 Start Recording
+                        </button>
+                        <div id="recording-status" style="margin-top: 15px; display: none;">
+                            <span class="recording-indicator"></span>
+                            Recording... <span id="recording-time">00:00</span>
+                        </div>
+                        <audio id="audio-playback" controls style="width: 100%; margin-top: 15px; display: none;"></audio>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proctoring Tab -->
+            <div id="proctoring-tab" class="tab-content hidden">
+                <h3>👁️ Proctoring System</h3>
+                <div id="proctoring-content">
+                    <div class="alert alert-info">
+                        Webcam monitoring and tab-switching detection for secure assessments.
+                    </div>
+                    <div class="video-container">
+                        <video id="webcam-feed" class="video-feed" autoplay muted></video>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button id="camera-btn" class="btn" onclick="toggleCamera()">
+                            📷 Enable Camera
+                        </button>
+                        <div id="camera-status" style="margin-top: 10px;">
+                            <span id="camera-indicator" class="status-indicator status-offline"></span>
+                            <span id="camera-text">Camera Off</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tab -->
+            <div id="admin-tab" class="tab-content hidden">
+                <h3>👤 Admin Dashboard</h3>
+                <div id="admin-content">
+                    <div class="alert alert-info">
+                        Admin access required to view candidate management and analytics.
+                    </div>
+                    <div class="stats-grid" id="admin-stats" style="display: none;">
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-candidates">0</div>
+                            <div class="stat-label">Total Candidates</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-assessments">0</div>
+                            <div class="stat-label">Total Assessments</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="completed-assessments">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="avg-score">0</div>
+                            <div class="stat-label">Average Score</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let currentToken = null;
+        let currentUser = null;
+        let currentAssessment = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingStartTime = null;
+        let recordingTimer = null;
+        let cameraStream = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkBackendStatus();
+            setupEventListeners();
+            setInterval(checkBackendStatus, 10000);
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // File upload
+            const fileUploadArea = document.getElementById('file-upload-area');
+            const fileInput = document.getElementById('resume-file');
+            
+            fileUploadArea.addEventListener('click', () => fileInput.click());
+            
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+            
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+            
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                handleFileUpload(e.data.files[0]);
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                handleFileUpload(e.target.files[0]);
+            });
+        }
+
+        // Check backend status
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                document.getElementById('backend-status').textContent = 'Online';
+                document.getElementById('backend-indicator').className = 'status-indicator status-online';
+                
+                return true;
+            } catch (error) {
+                document.getElementById('backend-status').textContent = 'Offline';
+                document.getElementById('backend-indicator').className = 'status-indicator status-offline';
+                return false;
+            }
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Load tab-specific content
+            loadTabContent(tabName);
+        }
+
+        // Load tab-specific content
+        async function loadTabContent(tabName) {
+            switch(tabName) {
+                case 'dashboard':
+                    await loadDashboard();
+                    break;
+                case 'admin':
+                    await loadAdminStats();
+                    break;
+            }
+        }
+
+        // Show message
+        function showMessage(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const container = document.querySelector('.tab-content:not(.hidden)');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // Show loading
+        function showLoading(elementId) {
+            document.getElementById(elementId).innerHTML = '<div class="loading"></div> Processing...';
+        }
+
+        // Hide loading
+        function hideLoading(elementId, content) {
+            document.getElementById(elementId).innerHTML = content;
+        }
+
+        // File upload handler
+        async function handleFileUpload(file) {
+            if (!file) return;
+            
+            const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!validTypes.includes(file.type)) {
+                showMessage('Please upload a PDF, DOC, or DOCX file', 'error');
+                return;
+            }
+            
+            if (file.size > 10 * 1024 * 1024) {
+                showMessage('File size must be less than 10MB', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            showLoading('upload-result');
+            
+            try {
+                const response = await fetch(`${API_BASE}/resumes/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    hideLoading('upload-result', `
+                        <div class="alert alert-success">
+                            <strong>Upload Successful!</strong><br>
+                            File: ${result.filename}<br>
+                            Skills: ${result.extracted_skills ? result.extracted_skills.join(', ') : 'Processing...'}<br>
+                            ${result.analysis_summary || 'Analysis in progress...'}
+                        </div>
+                    `);
+                    document.getElementById('upload-status').textContent = 'Uploaded';
+                } else {
+                    hideLoading('upload-result', `
+                        <div class="alert alert-error">
+                            Upload Failed: ${result.detail || 'Unknown error'}
+                        </div>
+                    `);
+                }
+            } catch (error) {
+                hideLoading('upload-result', `
+                    <div class="alert alert-error">
+                        Network Error: Please check your connection
+                    </div>
+                `);
+            }
+        }
+
+        // Start assessment
+        async function startAssessment() {
+            if (!currentToken) {
+                showMessage('Please login to start assessment', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/assessments/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentAssessment = result;
+                    document.getElementById('assessment-progress').style.display = 'block';
+                    document.getElementById('assessment-content').querySelector('.alert').style.display = 'none';
+                    showMessage('Assessment started successfully!', 'success');
+                    loadNextQuestion();
+                } else {
+                    showMessage(result.detail || 'Failed to start assessment', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Load next question
+        async function loadNextQuestion() {
+            if (!currentAssessment) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/assessments/${currentAssessment.assessment_id}/current-question`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    if (result.completed) {
+                        completeAssessment();
+                    } else {
+                        displayQuestion(result.question);
+                        updateProgress(result.order_index, result.total_questions);
+                    }
+                } else {
+                    showMessage(result.detail || 'Failed to load question', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Display question
+        function displayQuestion(question) {
+            const questionDiv = document.getElementById('current-question');
+            
+            let questionHTML = `
+                <div class="question-card">
+                    <h4>Question ${question.order_index + 1} of ${question.total_questions}</h4>
+                    <p><strong>Category:</strong> ${question.category} | <strong>Difficulty:</strong> ${question.difficulty}</p>
+                    <p style="font-size: 1.1rem; margin: 15px 0;">${question.question_text}</p>
+            `;
+            
+            if (question.question_type === 'mcq') {
+                question.options = JSON.parse(question.options || '[]');
+                questionHTML += '<div class="form-group">';
+                question.options.forEach((option, index) => {
+                    questionHTML += `
+                        <label style="display: block; margin: 10px 0; cursor: pointer;">
+                            <input type="radio" name="answer" value="${option}" style="margin-right: 8px;">
+                            ${String.fromCharCode(65 + index)}. ${option}
+                        </label>
+                    `;
+                });
+                questionHTML += '</div>';
+            } else if (question.question_type === 'short_answer') {
+                questionHTML += `
+                    <div class="form-group">
+                        <textarea id="answer-text" rows="4" placeholder="Type your answer here..."></textarea>
+                    </div>
+                `;
+            } else if (question.question_type === 'speaking') {
+                questionHTML += `
+                    <div class="alert alert-info">
+                        This is a speaking question. Please use the Speaking Test tab to record your response.
+                    </div>
+                `;
+            }
+            
+            questionHTML += `
+                <button class="btn" onclick="submitAnswer(${question.id}, '${question.question_type}')" style="margin-top: 15px;">
+                    Submit Answer
+                </button>
+            `;
+            
+            questionDiv.innerHTML = questionHTML;
+        }
+
+        // Update progress
+        function updateProgress(current, total) {
+            const progress = ((current + 1) / total) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = `Question ${current + 1} of ${total}`;
+        }
+
+        // Submit answer
+        async function submitAnswer(questionId, questionType) {
+            let answerText = null;
+            let selectedOption = null;
+            
+            if (questionType === 'mcq') {
+                const selected = document.querySelector('input[name="answer"]:checked');
+                selectedOption = selected ? selected.value : null;
+            } else if (questionType === 'short_answer') {
+                answerText = document.getElementById('answer-text').value;
+            }
+            
+            if (!answerText && !selectedOption) {
+                showMessage('Please provide an answer', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/assessments/${currentAssessment.assessment_id}/submit-response`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question_id: questionId,
+                        answer_text: answerText,
+                        selected_option: selectedOption,
+                        time_taken_seconds: 30 // Mock time
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('Answer submitted successfully!', 'success');
+                    loadNextQuestion();
+                } else {
+                    showMessage(result.detail || 'Failed to submit answer', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Complete assessment
+        async function completeAssessment() {
+            try {
+                const response = await fetch(`${API_BASE}/assessments/${currentAssessment.assessment_id}/complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('Assessment completed successfully!', 'success');
+                    document.getElementById('assessment-progress').innerHTML = `
+                        <div class="alert alert-success">
+                            <h4>🎉 Assessment Completed!</h4>
+                            <p><strong>Technical Score:</strong> ${result.scores.technical.toFixed(1)}%</p>
+                            <p><strong>Aptitude Score:</strong> ${result.scores.aptitude.toFixed(1)}%</p>
+                            <p><strong>Overall Score:</strong> ${result.scores.overall.toFixed(1)}%</p>
+                            <p><strong>Recommendation:</strong> ${result.recommendation}</p>
+                        </div>
+                    `;
+                } else {
+                    showMessage(result.detail || 'Failed to complete assessment', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Audio recording functions
+        async function toggleRecording() {
+            const recordBtn = document.getElementById('record-btn');
+            const recordingStatus = document.getElementById('recording-status');
+            const audioPlayback = document.getElementById('audio-playback');
+            
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayback.src = audioUrl;
+                        audioPlayback.style.display = 'block';
+                        
+                        // Here you would upload the audio file
+                        uploadAudioRecording(audioBlob);
+                    };
+                    
+                    mediaRecorder.start();
+                    recordingStartTime = Date.now();
+                    startRecordingTimer();
+                    
+                    recordBtn.textContent = '⏹️ Stop Recording';
+                    recordBtn.classList.add('btn-danger');
+                    recordingStatus.style.display = 'block';
+                } catch (error) {
+                    showMessage('Failed to access microphone. Please check permissions.', 'error');
+                }
+            } else {
+                mediaRecorder.stop();
+                stopRecordingTimer();
+                
+                recordBtn.textContent = '🎤 Start Recording';
+                recordBtn.classList.remove('btn-danger');
+                recordingStatus.style.display = 'none';
+            }
+        }
+
+        function startRecordingTimer() {
+            recordingTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('recording-time').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopRecordingTimer() {
+            if (recordingTimer) {
+                clearInterval(recordingTimer);
+                recordingTimer = null;
+            }
+        }
+
+        async function uploadAudioRecording(audioBlob) {
+            // This would upload the audio file to the backend
+            console.log('Audio recording ready for upload:', audioBlob);
+            showMessage('Audio recording saved successfully!', 'success');
+        }
+
+        // Camera functions
+        async function toggleCamera() {
+            const cameraBtn = document.getElementById('camera-btn');
+            const cameraText = document.getElementById('camera-text');
+            const cameraIndicator = document.getElementById('camera-indicator');
+            const videoFeed = document.getElementById('webcam-feed');
+            
+            if (!cameraStream) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: true, 
+                        audio: false 
+                    });
+                    
+                    cameraStream = stream;
+                    videoFeed.srcObject = stream;
+                    
+                    cameraBtn.textContent = '📷 Disable Camera';
+                    cameraText.textContent = 'Camera On';
+                    cameraIndicator.className = 'status-indicator status-online';
+                    
+                    showMessage('Camera enabled successfully!', 'success');
+                } catch (error) {
+                    showMessage('Failed to access camera. Please check permissions.', 'error');
+                }
+            } else {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+                videoFeed.srcObject = null;
+                
+                cameraBtn.textContent = '📷 Enable Camera';
+                cameraText.textContent = 'Camera Off';
+                cameraIndicator.className = 'status-indicator status-offline';
+                
+                showMessage('Camera disabled', 'info');
+            }
+        }
+
+        // Load dashboard
+        async function loadDashboard() {
+            if (!currentToken) {
+                document.getElementById('dashboard-content').innerHTML = `
+                    <div class="alert alert-info">
+                        Please login to view your dashboard and assessment history.
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/assessments`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    let dashboardHTML = '<h4>📊 Your Assessment History</h4>';
+                    
+                    if (result.assessments && result.assessments.length > 0) {
+                        result.assessments.forEach(assessment => {
+                            const statusColor = assessment.status === 'completed' ? '#28a745' : '#ffc107';
+                            dashboardHTML += `
+                                <div class="question-card" style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong>Assessment #${assessment.id}</strong><br>
+                                            <small>Started: ${new Date(assessment.started_at).toLocaleDateString()}</small>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <span style="color: ${statusColor}; font-weight: bold;">
+                                                ${assessment.status.toUpperCase()}
+                                            </span>
+                                            ${assessment.overall_score ? `<br>Score: ${assessment.overall_score.toFixed(1)}%` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        dashboardHTML += '<p>No assessments found. Start your first assessment!</p>';
+                    }
+                    
+                    document.getElementById('dashboard-content').innerHTML = dashboardHTML;
+                } else {
+                    document.getElementById('dashboard-content').innerHTML = `
+                        <div class="alert alert-error">
+                            Failed to load dashboard data
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('dashboard-content').innerHTML = `
+                    <div class="alert alert-error">
+                        Network error. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Load admin statistics
+        async function loadAdminStats() {
+            if (!currentToken) {
+                document.getElementById('admin-content').innerHTML = `
+                    <div class="alert alert-info">
+                        Admin access required to view statistics.
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/statistics`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const stats = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('total-candidates').textContent = stats.total_candidates || 0;
+                    document.getElementById('total-assessments').textContent = stats.total_assessments || 0;
+                    document.getElementById('completed-assessments').textContent = stats.completed_assessments || 0;
+                    document.getElementById('avg-score').textContent = (stats.average_score || 0).toFixed(1);
+                    document.getElementById('admin-stats').style.display = 'grid';
+                } else {
+                    document.getElementById('admin-content').innerHTML = `
+                        <div class="alert alert-error">
+                            Failed to load admin statistics
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('admin-content').innerHTML = `
+                    <div class="alert alert-error">
+                        Network error. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Mock login for demo
+        window.mockLogin = async function() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'Test@123456'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentToken = result.access_token;
+                    currentUser = result.user_data;
+                    showMessage('Login successful! Welcome ' + currentUser.full_name, 'success');
+                    loadDashboard();
+                } else {
+                    showMessage('Login failed: ' + (result.detail || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showMessage('Network error during login', 'error');
+            }
+        };
+    </script>
+</body>
+</html>

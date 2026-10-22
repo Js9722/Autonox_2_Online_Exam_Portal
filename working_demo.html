@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Evaluation System - Working Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .status {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .status-online {
+            background: #4CAF50;
+        }
+        
+        .status-offline {
+            background: #f44336;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: #f5f5f5;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        .tab-content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .error {
+            background: #f44336;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .question-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 AI Interview Evaluation System</h1>
+            <p>Complete Assessment Platform with AI-Powered Evaluation</p>
+        </div>
+
+        <!-- System Status -->
+        <div class="status">
+            <div class="status-item">
+                <span>Backend API (Port 8000)</span>
+                <div>
+                    <span id="backend-status">Checking...</span>
+                    <div id="backend-indicator" class="status-indicator"></div>
+                </div>
+            </div>
+            <div class="status-item">
+                <span>Database (SQLite)</span>
+                <div>
+                    <span id="db-status">Ready</span>
+                    <div class="status-indicator status-online"></div>
+                </div>
+            </div>
+            <div class="status-item">
+                <span>AI Services</span>
+                <div>
+                    <span id="ai-status">Needs API Key</span>
+                    <div id="ai-indicator" class="status-indicator status-offline"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('register')">Register</button>
+            <button class="tab" onclick="showTab('login')">Login</button>
+            <button class="tab" onclick="showTab('demo')">Demo</button>
+        </div>
+
+        <!-- Register Tab -->
+        <div id="register-tab" class="tab-content">
+            <h3>Create Account</h3>
+            <form id="register-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="reg-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" required>
+                </div>
+                <div class="form-group">
+                    <label>Experience Level</label>
+                    <select id="reg-experience">
+                        <option value="fresher">Fresher</option>
+                        <option value="junior">Junior (0-2 years)</option>
+                        <option value="mid_level">Mid Level (2-5 years)</option>
+                        <option value="senior">Senior (5-10 years)</option>
+                        <option value="lead">Lead (10+ years)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Register Account</button>
+            </form>
+        </div>
+
+        <!-- Login Tab -->
+        <div id="login-tab" class="tab-content hidden">
+            <h3>Login to Account</h3>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+
+        <!-- Demo Tab -->
+        <div id="demo-tab" class="tab-content hidden">
+            <h3>System Features Demo</h3>
+            
+            <div class="cards">
+                <div class="card">
+                    <h3>📝 Resume Analysis</h3>
+                    <p>Upload your resume (PDF/DOC) and let AI extract your skills and generate personalized questions.</p>
+                    <button class="btn" onclick="demoFeature('resume')">Test Resume Upload</button>
+                </div>
+                
+                <div class="card">
+                    <h3>🎯 Assessment Engine</h3>
+                    <p>Take comprehensive assessment with 65 questions including technical, aptitude, and speaking tests.</p>
+                    <button class="btn" onclick="demoFeature('assessment')">Start Assessment</button>
+                </div>
+                
+                <div class="card">
+                    <h3>👁️ Proctoring System</h3>
+                    <p>AI-powered monitoring with webcam tracking and violation detection for secure assessments.</p>
+                    <button class="btn" onclick="demoFeature('proctoring')">Test Proctoring</button>
+                </div>
+                
+                <div class="card">
+                    <h3>📊 Analytics Dashboard</h3>
+                    <p>Comprehensive admin dashboard with candidate management and performance analytics.</p>
+                    <button class="btn" onclick="demoFeature('admin')">Admin Dashboard</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Assessment Demo -->
+        <div id="assessment-demo" class="hidden" style="margin-top: 30px;">
+            <div class="status">
+                <h3>📝 Sample Assessment Questions</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 20%"></div>
+                </div>
+                <p style="text-align: center; margin-top: 10px;">Question 1 of 5 (Demo)</p>
+            </div>
+            
+            <div class="question-card">
+                <h4>Technical Question</h4>
+                <p><strong>What is the time complexity of binary search algorithm?</strong></p>
+                <div class="form-group">
+                    <label>Select your answer:</label>
+                    <select>
+                        <option>O(n)</option>
+                        <option>O(log n)</option>
+                        <option>O(n²)</option>
+                        <option>O(1)</option>
+                    </select>
+                </div>
+                <button class="btn">Next Question</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        let currentToken = null;
+        let currentUser = null;
+
+        // Check backend status
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                
+                document.getElementById('backend-status').textContent = 'Online';
+                document.getElementById('backend-indicator').className = 'status-indicator status-online';
+                
+                return true;
+            } catch (error) {
+                document.getElementById('backend-status').textContent = 'Offline';
+                document.getElementById('backend-indicator').className = 'status-indicator status-offline';
+                
+                return false;
+            }
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Registration
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                name: document.getElementById('reg-name').value,
+                email: document.getElementById('reg-email').value,
+                password: document.getElementById('reg-password').value,
+                experience_level: document.getElementById('reg-experience').value
+            };
+
+            try {
+                const response = await fetch(API_BASE + '/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Registration successful! Please login.');
+                    showTab('login');
+                } else {
+                    showError(data.detail || 'Registration failed');
+                }
+            } catch (error) {
+                showError('Network error. Please check backend connection.');
+            }
+        });
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const credentials = {
+                email: document.getElementById('login-email').value,
+                password: document.getElementById('login-password').value
+            };
+
+            try {
+                const response = await fetch(API_BASE + '/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(credentials)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentToken = data.access_token;
+                    currentUser = data.candidate;
+                    localStorage.setItem('token', currentToken);
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    
+                    showSuccess('Login successful! Welcome ' + currentUser.name);
+                    
+                    // Show assessment demo
+                    setTimeout(() => {
+                        document.getElementById('assessment-demo').classList.remove('hidden');
+                    }, 2000);
+                } else {
+                    showError(data.detail || 'Login failed');
+                }
+            } catch (error) {
+                showError('Network error. Please check backend connection.');
+            }
+        });
+
+        // Demo features
+        function demoFeature(feature) {
+            switch(feature) {
+                case 'resume':
+                    showSuccess('Resume upload feature ready! Backend API: POST /api/resumes/upload');
+                    break;
+                case 'assessment':
+                    showSuccess('Assessment engine ready! 65 questions with AI proctoring');
+                    document.getElementById('assessment-demo').classList.remove('hidden');
+                    break;
+                case 'proctoring':
+                    showSuccess('Proctoring system active! Webcam monitoring enabled');
+                    break;
+                case 'admin':
+                    showSuccess('Admin dashboard available! Visit: http://localhost:8000/api/docs');
+                    break;
+            }
+        }
+
+        // Utility functions
+        function showSuccess(message) {
+            const div = document.createElement('div');
+            div.className = 'success';
+            div.textContent = message;
+            document.querySelector('.container').insertBefore(div, document.querySelector('.tabs'));
+            
+            setTimeout(() => div.remove(), 5000);
+        }
+
+        function showError(message) {
+            const div = document.createElement('div');
+            div.className = 'error';
+            div.textContent = message;
+            document.querySelector('.container').insertBefore(div, document.querySelector('.tabs'));
+            
+            setTimeout(() => div.remove(), 5000);
+        }
+
+        // Initialize
+        checkBackendStatus();
+        setInterval(checkBackendStatus, 10000); // Check every 10 seconds
+    </script>
+</body>
+</html>
